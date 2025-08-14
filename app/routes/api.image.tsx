@@ -5,9 +5,16 @@ import { handleError } from "../utils/error";
 import { withAuth } from "../middleware/auth";
 import { withCors } from "../middleware/cors";
 
-export const loader: LoaderFunction = () => {
+// 修改后的 loader
+export const loader: LoaderFunction = withCors(async ({ request }) => {
+  // 专门处理 OPTIONS 预检请求
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204 });
+  }
+  
+  // 对于其他非 POST 请求（如 GET），返回错误
   return json({ error: "此 API 端点仅支持 POST 请求" }, { status: 405 });
-};
+});
 
 export const action: ActionFunction = withCors(withAuth(async ({ request, context }) => {
   const appContext = createAppContext(context);
